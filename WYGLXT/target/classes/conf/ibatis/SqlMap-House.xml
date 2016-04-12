@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="House">
+	<!--引入pojo-->
+	<typeAlias alias="house" type="com.xiaoqu.wygl.house.dto.House" />
+	<typeAlias alias="houseCondition" type="com.xiaoqu.wygl.house.dto.HouseCondition" />
+
+	<!-- search resultMap -->
+	<resultMap id="houseResult" class="house">
+		<result property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="height" column="height" />
+		<result property="storey" column="storey" />
+		<result property="space" column="space" />
+		<result property="creatTime" column="creat_time" />
+		<result property="remark" column="remark" />
+	</resultMap>
+
+	<sql id="queryCondition">
+		id,name,height,storey,space,creat_time,remark
+	</sql>
+	
+	<!--插入语句-->
+	<insert id="add">
+		INSERT INTO
+			house(name,height,storey,space,creat_time,remark)
+		values
+			<dynamic>
+		(
+		<isEmpty property="name">
+			null,
+		</isEmpty>
+		<isNotEmpty property="name">
+			#name#,
+		</isNotEmpty>
+		<isEmpty property="height">
+			null,
+		</isEmpty>
+		<isNotEmpty property="height">
+			#height#,
+		</isNotEmpty>
+		<isEmpty property="storey">
+			null,
+		</isEmpty>
+		<isNotEmpty property="storey">
+			#storey#,
+		</isNotEmpty>
+		<isEmpty property="space">
+			null,
+		</isEmpty>
+		<isNotEmpty property="space">
+			#space#,
+		</isNotEmpty>
+		<isEmpty property="creatTime">
+			null,
+		</isEmpty>
+		<isNotEmpty property="creatTime">
+			#creatTime#,
+		</isNotEmpty>
+		<isEmpty property="remark">
+			null
+		</isEmpty>
+		<isNotEmpty property="remark">
+			#remark#
+		</isNotEmpty>
+		)
+		</dynamic>
+		<selectKey resultClass="java.lang.Integer" keyProperty="id">  
+        	select last_insert_id() as ID from house limit 1  
+    	</selectKey>
+	</insert>
+
+	<!--删除语句 -->
+    <delete id="delete" parameterClass="java.lang.Integer">  
+        DELETE FROM 
+        	house 
+        WHERE 
+        	id = #id#  
+    </delete>
+    
+    <!--修改语句 -->
+    <update id="update" parameterClass="house">  
+        UPDATE 
+        	house 
+        SET <!-- updateTime = sysdate  -->
+		<dynamic>
+			<isNotNull property="name">
+				<isEmpty property="name">
+					name = null
+				</isEmpty>
+				<isNotEmpty property="name">
+					name = #name#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="height">
+				<isEmpty property="height">
+					height = null
+				</isEmpty>
+				<isNotEmpty property="height">
+					height = #height#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="storey">
+				<isEmpty property="storey">
+					storey = null
+				</isEmpty>
+				<isNotEmpty property="storey">
+					storey = #storey#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="space">
+				<isEmpty property="space">
+					space = null
+				</isEmpty>
+				<isNotEmpty property="space">
+					space = #space#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="creatTime">
+				<isEmpty property="creatTime">
+					creat_time = null
+				</isEmpty>
+				<isNotEmpty property="creatTime">
+					creat_time = #creatTime#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="remark">
+				<isEmpty property="remark">
+					remark = null
+				</isEmpty>
+				<isNotEmpty property="remark">
+					remark = #remark#
+				</isNotEmpty>
+			</isNotNull>
+
+		</dynamic>
+        WHERE 
+        	id = #id# 
+    </update>
+    
+    <!--通过id查找 -->
+	<select id="findById" resultMap="houseResult">
+		SELECT  
+			<include refid="queryCondition"/> 
+		FROM 
+			house 
+		WHERE
+			id = #id#
+	</select>
+	
+	
+	<sql id="queryConditionSql">
+		SELECT 
+			<include refid="queryCondition"/> 
+		FROM  
+			house 
+	    <dynamic prepend="WHERE">
+			<isNotNull prepend="and" property="id">
+				id = #id#
+			</isNotNull>
+			<isNotNull prepend="and" property="name">
+				name = #name#
+			</isNotNull>
+			<isNotNull prepend="and" property="height">
+				height = #height#
+			</isNotNull>
+			<isNotNull prepend="and" property="storey">
+				storey = #storey#
+			</isNotNull>
+			<isNotNull prepend="and" property="space">
+				space = #space#
+			</isNotNull>
+			<isNotNull prepend="and" property="creatTime">
+				creat_time = #creatTime#
+			</isNotNull>
+			<isNotNull prepend="and" property="remark">
+				remark = #remark#
+			</isNotNull>
+
+	    </dynamic>
+	</sql>
+	
+	<!--分页查询-->
+	<select id="findPageByCondition" resultMap="houseResult" parameterClass="houseCondition">
+		<include refid="queryConditionSql"/>
+		limit 
+			#startRow#,#endRow# 
+	</select>
+	
+	<select id="countByCondition" parameterClass="houseCondition" resultClass="java.lang.Integer">
+		select 
+			count(*) 
+		from 
+			(<include refid="queryConditionSql"/>) as da
+	</select>
+	
+</sqlMap>

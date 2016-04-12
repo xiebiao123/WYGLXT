@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Estate">
+	<!--引入pojo-->
+	<typeAlias alias="estate" type="com.xiaoqu.wygl.estate.dto.Estate" />
+	<typeAlias alias="estateCondition" type="com.xiaoqu.wygl.estate.dto.EstateCondition" />
+
+	<!-- search resultMap -->
+	<resultMap id="estateResult" class="estate">
+		<result property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="floorSpace" column="floor_space" />
+		<result property="roadSpace" column="road_space" />
+		<result property="buildSpace" column="build_space" />
+		<result property="greenSpace" column="green_space" />
+		<result property="buildCount" column="build_count" />
+		<result property="remark" column="remark" />
+	</resultMap>
+
+	<sql id="queryCondition">
+		id,name,floor_space,road_space,build_space,green_space,build_count,remark
+	</sql>
+	
+	<!--插入语句-->
+	<insert id="add">
+		INSERT INTO
+			estate(name,floor_space,road_space,build_space,green_space,build_count,remark)
+		values
+			<dynamic>
+		(
+		<isEmpty property="name">
+			null,
+		</isEmpty>
+		<isNotEmpty property="name">
+			#name#,
+		</isNotEmpty>
+		<isEmpty property="floorSpace">
+			null,
+		</isEmpty>
+		<isNotEmpty property="floorSpace">
+			#floorSpace#,
+		</isNotEmpty>
+		<isEmpty property="roadSpace">
+			null,
+		</isEmpty>
+		<isNotEmpty property="roadSpace">
+			#roadSpace#,
+		</isNotEmpty>
+		<isEmpty property="buildSpace">
+			null,
+		</isEmpty>
+		<isNotEmpty property="buildSpace">
+			#buildSpace#,
+		</isNotEmpty>
+		<isEmpty property="greenSpace">
+			null,
+		</isEmpty>
+		<isNotEmpty property="greenSpace">
+			#greenSpace#,
+		</isNotEmpty>
+		<isEmpty property="buildCount">
+			null,
+		</isEmpty>
+		<isNotEmpty property="buildCount">
+			#buildCount#,
+		</isNotEmpty>
+		<isEmpty property="remark">
+			null
+		</isEmpty>
+		<isNotEmpty property="remark">
+			#remark#
+		</isNotEmpty>
+		)
+		</dynamic>
+		<selectKey resultClass="java.lang.Integer" keyProperty="id">  
+        	select last_insert_id() as ID from estate limit 1  
+    	</selectKey>
+	</insert>
+
+	<!--删除语句 -->
+    <delete id="delete" parameterClass="java.lang.Integer">  
+        DELETE FROM 
+        	estate 
+        WHERE 
+        	id = #id#  
+    </delete>
+    
+    <!--修改语句 -->
+    <update id="update" parameterClass="estate">  
+        UPDATE 
+        	estate 
+        SET <!-- updateTime = sysdate  -->
+		<dynamic>
+			<isNotNull property="name">
+				<isEmpty property="name">
+					name = null
+				</isEmpty>
+				<isNotEmpty property="name">
+					name = #name#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="floorSpace">
+				<isEmpty property="floorSpace">
+					floor_space = null
+				</isEmpty>
+				<isNotEmpty property="floorSpace">
+					floor_space = #floorSpace#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="roadSpace">
+				<isEmpty property="roadSpace">
+					road_space = null
+				</isEmpty>
+				<isNotEmpty property="roadSpace">
+					road_space = #roadSpace#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="buildSpace">
+				<isEmpty property="buildSpace">
+					build_space = null
+				</isEmpty>
+				<isNotEmpty property="buildSpace">
+					build_space = #buildSpace#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="greenSpace">
+				<isEmpty property="greenSpace">
+					green_space = null
+				</isEmpty>
+				<isNotEmpty property="greenSpace">
+					green_space = #greenSpace#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="buildCount">
+				<isEmpty property="buildCount">
+					build_count = null
+				</isEmpty>
+				<isNotEmpty property="buildCount">
+					build_count = #buildCount#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="remark">
+				<isEmpty property="remark">
+					remark = null
+				</isEmpty>
+				<isNotEmpty property="remark">
+					remark = #remark#
+				</isNotEmpty>
+			</isNotNull>
+
+		</dynamic>
+        WHERE 
+        	id = #id# 
+    </update>
+    
+    <!--通过id查找 -->
+	<select id="findById" resultMap="estateResult">
+		SELECT  
+			<include refid="queryCondition"/> 
+		FROM 
+			estate 
+		WHERE
+			id = #id#
+	</select>
+	
+	
+	<sql id="queryConditionSql">
+		SELECT 
+			<include refid="queryCondition"/> 
+		FROM  
+			estate 
+	    <dynamic prepend="WHERE">
+			<isNotNull prepend="and" property="id">
+				id = #id#
+			</isNotNull>
+			<isNotNull prepend="and" property="name">
+				name = #name#
+			</isNotNull>
+			<isNotNull prepend="and" property="floorSpace">
+				floor_space = #floorSpace#
+			</isNotNull>
+			<isNotNull prepend="and" property="roadSpace">
+				road_space = #roadSpace#
+			</isNotNull>
+			<isNotNull prepend="and" property="buildSpace">
+				build_space = #buildSpace#
+			</isNotNull>
+			<isNotNull prepend="and" property="greenSpace">
+				green_space = #greenSpace#
+			</isNotNull>
+			<isNotNull prepend="and" property="buildCount">
+				build_count = #buildCount#
+			</isNotNull>
+			<isNotNull prepend="and" property="remark">
+				remark = #remark#
+			</isNotNull>
+
+	    </dynamic>
+	</sql>
+	
+	<!--分页查询-->
+	<select id="findPageByCondition" resultMap="estateResult" parameterClass="estateCondition">
+		<include refid="queryConditionSql"/>
+		limit 
+			#startRow#,#endRow# 
+	</select>
+	
+	<select id="countByCondition" parameterClass="estateCondition" resultClass="java.lang.Integer">
+		select 
+			count(*) 
+		from 
+			(<include refid="queryConditionSql"/>) as da
+	</select>
+	
+</sqlMap>

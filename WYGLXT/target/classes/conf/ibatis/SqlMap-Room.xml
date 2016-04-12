@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Room">
+	<!--引入pojo-->
+	<typeAlias alias="room" type="com.xiaoqu.wygl.room.dto.Room" />
+	<typeAlias alias="roomCondition" type="com.xiaoqu.wygl.room.dto.RoomCondition" />
+
+	<!-- search resultMap -->
+	<resultMap id="roomResult" class="room">
+		<result property="id" column="id" />
+		<result property="houseId" column="house_id" />
+		<result property="roomId" column="room_id" />
+		<result property="floor" column="floor" />
+		<result property="space" column="space" />
+		<result property="userId" column="user_id" />
+		<result property="startTime" column="start_time" />
+		<result property="remark" column="remark" />
+	</resultMap>
+
+	<sql id="queryCondition">
+		id,house_id,room_id,floor,space,user_id,start_time,remark
+	</sql>
+	
+	<!--插入语句-->
+	<insert id="add">
+		INSERT INTO
+			room(house_id,room_id,floor,space,user_id,start_time,remark)
+		values
+			<dynamic>
+		(
+		<isEmpty property="houseId">
+			null,
+		</isEmpty>
+		<isNotEmpty property="houseId">
+			#houseId#,
+		</isNotEmpty>
+		<isEmpty property="roomId">
+			null,
+		</isEmpty>
+		<isNotEmpty property="roomId">
+			#roomId#,
+		</isNotEmpty>
+		<isEmpty property="floor">
+			null,
+		</isEmpty>
+		<isNotEmpty property="floor">
+			#floor#,
+		</isNotEmpty>
+		<isEmpty property="space">
+			null,
+		</isEmpty>
+		<isNotEmpty property="space">
+			#space#,
+		</isNotEmpty>
+		<isEmpty property="userId">
+			null,
+		</isEmpty>
+		<isNotEmpty property="userId">
+			#userId#,
+		</isNotEmpty>
+		<isEmpty property="startTime">
+			null,
+		</isEmpty>
+		<isNotEmpty property="startTime">
+			#startTime#,
+		</isNotEmpty>
+		<isEmpty property="remark">
+			null
+		</isEmpty>
+		<isNotEmpty property="remark">
+			#remark#
+		</isNotEmpty>
+		)
+		</dynamic>
+		<selectKey resultClass="java.lang.Integer" keyProperty="id">  
+        	select last_insert_id() as ID from room limit 1  
+    	</selectKey>
+	</insert>
+
+	<!--删除语句 -->
+    <delete id="delete" parameterClass="java.lang.Integer">  
+        DELETE FROM 
+        	room 
+        WHERE 
+        	id = #id#  
+    </delete>
+    
+    <!--修改语句 -->
+    <update id="update" parameterClass="room">  
+        UPDATE 
+        	room 
+        SET <!-- updateTime = sysdate  -->
+		<dynamic>
+			<isNotNull property="houseId">
+				<isEmpty property="houseId">
+					house_id = null
+				</isEmpty>
+				<isNotEmpty property="houseId">
+					house_id = #houseId#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="roomId">
+				<isEmpty property="roomId">
+					room_id = null
+				</isEmpty>
+				<isNotEmpty property="roomId">
+					room_id = #roomId#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="floor">
+				<isEmpty property="floor">
+					floor = null
+				</isEmpty>
+				<isNotEmpty property="floor">
+					floor = #floor#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="space">
+				<isEmpty property="space">
+					space = null
+				</isEmpty>
+				<isNotEmpty property="space">
+					space = #space#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="userId">
+				<isEmpty property="userId">
+					user_id = null
+				</isEmpty>
+				<isNotEmpty property="userId">
+					user_id = #userId#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="startTime">
+				<isEmpty property="startTime">
+					start_time = null
+				</isEmpty>
+				<isNotEmpty property="startTime">
+					start_time = #startTime#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="remark">
+				<isEmpty property="remark">
+					remark = null
+				</isEmpty>
+				<isNotEmpty property="remark">
+					remark = #remark#
+				</isNotEmpty>
+			</isNotNull>
+
+		</dynamic>
+        WHERE 
+        	id = #id# 
+    </update>
+    
+    <!--通过id查找 -->
+	<select id="findById" resultMap="roomResult">
+		SELECT  
+			<include refid="queryCondition"/> 
+		FROM 
+			room 
+		WHERE
+			id = #id#
+	</select>
+	
+	
+	<sql id="queryConditionSql">
+		SELECT 
+			<include refid="queryCondition"/> 
+		FROM  
+			room 
+	    <dynamic prepend="WHERE">
+			<isNotNull prepend="and" property="id">
+				id = #id#
+			</isNotNull>
+			<isNotNull prepend="and" property="houseId">
+				house_id = #houseId#
+			</isNotNull>
+			<isNotNull prepend="and" property="roomId">
+				room_id = #roomId#
+			</isNotNull>
+			<isNotNull prepend="and" property="floor">
+				floor = #floor#
+			</isNotNull>
+			<isNotNull prepend="and" property="space">
+				space = #space#
+			</isNotNull>
+			<isNotNull prepend="and" property="userId">
+				user_id = #userId#
+			</isNotNull>
+			<isNotNull prepend="and" property="startTime">
+				start_time = #startTime#
+			</isNotNull>
+			<isNotNull prepend="and" property="remark">
+				remark = #remark#
+			</isNotNull>
+
+	    </dynamic>
+	</sql>
+	
+	<!--分页查询-->
+	<select id="findPageByCondition" resultMap="roomResult" parameterClass="roomCondition">
+		<include refid="queryConditionSql"/>
+		limit 
+			#startRow#,#endRow# 
+	</select>
+	
+	<select id="countByCondition" parameterClass="roomCondition" resultClass="java.lang.Integer">
+		select 
+			count(*) 
+		from 
+			(<include refid="queryConditionSql"/>) as da
+	</select>
+	
+</sqlMap>

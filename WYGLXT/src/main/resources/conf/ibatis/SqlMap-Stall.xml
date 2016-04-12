@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Stall">
+	<!--引入pojo-->
+	<typeAlias alias="stall" type="com.xiaoqu.wygl.stall.dto.Stall" />
+	<typeAlias alias="stallCondition" type="com.xiaoqu.wygl.stall.dto.StallCondition" />
+
+	<!-- search resultMap -->
+	<resultMap id="stallResult" class="stall">
+		<result property="id" column="id" />
+		<result property="status" column="status" />
+		<result property="startTime" column="start_time" />
+		<result property="endTime" column="end_time" />
+		<result property="userId" column="user_id" />
+		<result property="remark" column="remark" />
+		<result property="cost" column="cost" />
+	</resultMap>
+
+	<sql id="queryCondition">
+		id,status,start_time,end_time,user_id,remark,cost
+	</sql>
+	
+	<!--插入语句-->
+	<insert id="add">
+		INSERT INTO
+			stall(status,start_time,end_time,user_id,remark,cost)
+		values
+			<dynamic>
+		(
+		<isEmpty property="status">
+			null,
+		</isEmpty>
+		<isNotEmpty property="status">
+			#status#,
+		</isNotEmpty>
+		<isEmpty property="startTime">
+			null,
+		</isEmpty>
+		<isNotEmpty property="startTime">
+			#startTime#,
+		</isNotEmpty>
+		<isEmpty property="endTime">
+			null,
+		</isEmpty>
+		<isNotEmpty property="endTime">
+			#endTime#,
+		</isNotEmpty>
+		<isEmpty property="userId">
+			null,
+		</isEmpty>
+		<isNotEmpty property="userId">
+			#userId#,
+		</isNotEmpty>
+		<isEmpty property="remark">
+			null,
+		</isEmpty>
+		<isNotEmpty property="remark">
+			#remark#,
+		</isNotEmpty>
+		<isEmpty property="cost">
+			null
+		</isEmpty>
+		<isNotEmpty property="cost">
+			#cost#
+		</isNotEmpty>
+		)
+		</dynamic>
+		<selectKey resultClass="java.lang.Integer" keyProperty="id">  
+        	select last_insert_id() as ID from stall limit 1  
+    	</selectKey>
+	</insert>
+
+	<!--删除语句 -->
+    <delete id="delete" parameterClass="java.lang.Integer">  
+        DELETE FROM 
+        	stall 
+        WHERE 
+        	id = #id#  
+    </delete>
+    
+    <!--修改语句 -->
+    <update id="update" parameterClass="stall">  
+        UPDATE 
+        	stall 
+        SET <!-- updateTime = sysdate  -->
+		<dynamic>
+			<isNotNull property="status">
+				<isEmpty property="status">
+					status = null
+				</isEmpty>
+				<isNotEmpty property="status">
+					status = #status#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="startTime">
+				<isEmpty property="startTime">
+					start_time = null
+				</isEmpty>
+				<isNotEmpty property="startTime">
+					start_time = #startTime#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="endTime">
+				<isEmpty property="endTime">
+					end_time = null
+				</isEmpty>
+				<isNotEmpty property="endTime">
+					end_time = #endTime#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="userId">
+				<isEmpty property="userId">
+					user_id = null
+				</isEmpty>
+				<isNotEmpty property="userId">
+					user_id = #userId#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="remark">
+				<isEmpty property="remark">
+					remark = null
+				</isEmpty>
+				<isNotEmpty property="remark">
+					remark = #remark#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="cost">
+				<isEmpty property="cost">
+					cost = null
+				</isEmpty>
+				<isNotEmpty property="cost">
+					cost = #cost#
+				</isNotEmpty>
+			</isNotNull>
+
+		</dynamic>
+        WHERE 
+        	id = #id# 
+    </update>
+    
+    <!--通过id查找 -->
+	<select id="findById" resultMap="stallResult">
+		SELECT  
+			<include refid="queryCondition"/> 
+		FROM 
+			stall 
+		WHERE
+			id = #id#
+	</select>
+	
+	
+	<sql id="queryConditionSql">
+		SELECT 
+			<include refid="queryCondition"/> 
+		FROM  
+			stall 
+	    <dynamic prepend="WHERE">
+			<isNotNull prepend="and" property="id">
+				id = #id#
+			</isNotNull>
+			<isNotNull prepend="and" property="status">
+				status = #status#
+			</isNotNull>
+			<isNotNull prepend="and" property="startTime">
+				start_time = #startTime#
+			</isNotNull>
+			<isNotNull prepend="and" property="endTime">
+				end_time = #endTime#
+			</isNotNull>
+			<isNotNull prepend="and" property="userId">
+				user_id = #userId#
+			</isNotNull>
+			<isNotNull prepend="and" property="remark">
+				remark = #remark#
+			</isNotNull>
+			<isNotNull prepend="and" property="cost">
+				cost = #cost#
+			</isNotNull>
+
+	    </dynamic>
+	</sql>
+	
+	<!--分页查询-->
+	<select id="findPageByCondition" resultMap="stallResult" parameterClass="stallCondition">
+		<include refid="queryConditionSql"/>
+		limit 
+			#startRow#,#endRow# 
+	</select>
+	
+	<select id="countByCondition" parameterClass="stallCondition" resultClass="java.lang.Integer">
+		select 
+			count(*) 
+		from 
+			(<include refid="queryConditionSql"/>) as da
+	</select>
+	
+</sqlMap>

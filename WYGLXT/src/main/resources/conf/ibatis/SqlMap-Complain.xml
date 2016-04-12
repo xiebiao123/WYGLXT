@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Complain">
+	<!--引入pojo-->
+	<typeAlias alias="complain" type="com.xiaoqu.wygl.complain.dto.Complain" />
+	<typeAlias alias="complainCondition" type="com.xiaoqu.wygl.complain.dto.ComplainCondition" />
+
+	<!-- search resultMap -->
+	<resultMap id="complainResult" class="complain">
+		<result property="id" column="id" />
+		<result property="userId" column="user_id" />
+		<result property="content" column="content" />
+		<result property="startTime" column="start_time" />
+		<result property="workId" column="work_id" />
+		<result property="status" column="status" />
+		<result property="remark" column="remark" />
+	</resultMap>
+
+	<sql id="queryCondition">
+		id,user_id,content,start_time,work_id,status,remark
+	</sql>
+	
+	<!--插入语句-->
+	<insert id="add">
+		INSERT INTO
+			complain(user_id,content,start_time,work_id,status,remark)
+		values
+			<dynamic>
+		(
+		<isEmpty property="userId">
+			null,
+		</isEmpty>
+		<isNotEmpty property="userId">
+			#userId#,
+		</isNotEmpty>
+		<isEmpty property="content">
+			null,
+		</isEmpty>
+		<isNotEmpty property="content">
+			#content#,
+		</isNotEmpty>
+		<isEmpty property="startTime">
+			null,
+		</isEmpty>
+		<isNotEmpty property="startTime">
+			#startTime#,
+		</isNotEmpty>
+		<isEmpty property="workId">
+			null,
+		</isEmpty>
+		<isNotEmpty property="workId">
+			#workId#,
+		</isNotEmpty>
+		<isEmpty property="status">
+			null,
+		</isEmpty>
+		<isNotEmpty property="status">
+			#status#,
+		</isNotEmpty>
+		<isEmpty property="remark">
+			null
+		</isEmpty>
+		<isNotEmpty property="remark">
+			#remark#
+		</isNotEmpty>
+		)
+		</dynamic>
+		<selectKey resultClass="java.lang.Integer" keyProperty="id">  
+        	select last_insert_id() as ID from complain limit 1  
+    	</selectKey>
+	</insert>
+
+	<!--删除语句 -->
+    <delete id="delete" parameterClass="java.lang.Integer">  
+        DELETE FROM 
+        	complain 
+        WHERE 
+        	id = #id#  
+    </delete>
+    
+    <!--修改语句 -->
+    <update id="update" parameterClass="complain">  
+        UPDATE 
+        	complain 
+        SET <!-- updateTime = sysdate  -->
+		<dynamic>
+			<isNotNull property="userId">
+				<isEmpty property="userId">
+					user_id = null
+				</isEmpty>
+				<isNotEmpty property="userId">
+					user_id = #userId#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="content">
+				<isEmpty property="content">
+					content = null
+				</isEmpty>
+				<isNotEmpty property="content">
+					content = #content#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="startTime">
+				<isEmpty property="startTime">
+					start_time = null
+				</isEmpty>
+				<isNotEmpty property="startTime">
+					start_time = #startTime#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="workId">
+				<isEmpty property="workId">
+					work_id = null
+				</isEmpty>
+				<isNotEmpty property="workId">
+					work_id = #workId#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="status">
+				<isEmpty property="status">
+					status = null
+				</isEmpty>
+				<isNotEmpty property="status">
+					status = #status#
+				</isNotEmpty>
+			</isNotNull>
+			<isNotNull prepend="," property="remark">
+				<isEmpty property="remark">
+					remark = null
+				</isEmpty>
+				<isNotEmpty property="remark">
+					remark = #remark#
+				</isNotEmpty>
+			</isNotNull>
+
+		</dynamic>
+        WHERE 
+        	id = #id# 
+    </update>
+    
+    <!--通过id查找 -->
+	<select id="findById" resultMap="complainResult">
+		SELECT  
+			<include refid="queryCondition"/> 
+		FROM 
+			complain 
+		WHERE
+			id = #id#
+	</select>
+	
+	
+	<sql id="queryConditionSql">
+		SELECT 
+			<include refid="queryCondition"/> 
+		FROM  
+			complain 
+	    <dynamic prepend="WHERE">
+			<isNotNull prepend="and" property="id">
+				id = #id#
+			</isNotNull>
+			<isNotNull prepend="and" property="userId">
+				user_id = #userId#
+			</isNotNull>
+			<isNotNull prepend="and" property="content">
+				content = #content#
+			</isNotNull>
+			<isNotNull prepend="and" property="startTime">
+				start_time = #startTime#
+			</isNotNull>
+			<isNotNull prepend="and" property="workId">
+				work_id = #workId#
+			</isNotNull>
+			<isNotNull prepend="and" property="status">
+				status = #status#
+			</isNotNull>
+			<isNotNull prepend="and" property="remark">
+				remark = #remark#
+			</isNotNull>
+
+	    </dynamic>
+	</sql>
+	
+	<!--分页查询-->
+	<select id="findPageByCondition" resultMap="complainResult" parameterClass="complainCondition">
+		<include refid="queryConditionSql"/>
+		limit 
+			#startRow#,#endRow# 
+	</select>
+	
+	<select id="countByCondition" parameterClass="complainCondition" resultClass="java.lang.Integer">
+		select 
+			count(*) 
+		from 
+			(<include refid="queryConditionSql"/>) as da
+	</select>
+	
+</sqlMap>
